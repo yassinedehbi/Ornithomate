@@ -26,8 +26,7 @@ def parse_doc(xml_file:str):
     print(final_list[:4])
     return final_list
 
-parse_doc('/Users/yassinedehbi/ProjetLong/data/p0133_bird_data/cvat_annotations_wip/task_05-01-2021.xml')
-
+#exemple
 #[{'path': 'bird/task_05-01-2021/2021-01-05-18-17-53.jpg', 'width': '1920', 'height': '1088', 'elements': [{'xtl': '15.48', 'ytl': '15.28', 'xbr': '1908.46', 'ybr': '1080.40', 'label': 'noBird'}]}, {'path': 'bird/task_05-01-2021/2021-01-05-18-17-51.jpg', 'width': '1920', 'height': '1088', 'elements': [{'xtl': '11.62', 'ytl': '9.49', 'xbr': '1914.25', 'ybr': '1088.00', 'label': 'noBird'}]}, {'path': 'bird/task_05-01-2021/2021-01-05-18-17-49.jpg', 'width': '1920', 'height': '1088', 'elements': [{'xtl': '7.76', 'ytl': '5.60', 'xbr': '1906.53', 'ybr': '1088.00', 'label': 'noBird'}]}, {'path': 'bird/task_05-01-2021/2021-01-05-18-17-47.jpg', 'width': '1920', 'height': '1088', 'elements': [{'xtl': '17.41', 'ytl': '15.28', 'xbr': '1904.60', 'ybr': '1080.40', 'label': 'noBird'}]}]
         
 
