@@ -14,11 +14,11 @@ from yolo3_MobileNet.utils import get_random_data
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 def _main():
-    train_path = 'car_train.txt'
-    val_path = 'car_val.txt'
-    log_dir = 'logs/carMobilenet/001_Mobilenet_finetune/'
-    classes_path = 'model_data/car_classes.txt'
-    anchors_path = 'model_data/yolo_anchors.txt'
+    train_path = '/Users/yassinedehbi/ProjetLong/birds-data/train.txt'
+    val_path = '/Users/yassinedehbi/ProjetLong/birds-data/val.txt'
+    log_dir = 'logs/001_Mobilenet_finetune/'
+    classes_path = '/Users/yassinedehbi/ProjetLong/birds-data/classes.txt'
+    anchors_path = '/Users/yassinedehbi/ProjetLong/yolo_anchors.txt'
     class_names = get_classes(classes_path)
     num_classes = len(class_names)
     anchors = get_anchors(anchors_path)
@@ -26,13 +26,10 @@ def _main():
     input_shape = (320,320) # multiple of 32, hw
 
     is_tiny_version = len(anchors)==6 # default setting
-    if is_tiny_version:
-        model = create_tiny_model(input_shape, anchors, num_classes,
-            freeze_body=2)
-    else:
-        model = create_model(input_shape, anchors, num_classes,load_pretrained=False,
-                             weights_path='logs/carMobilenet/000_Mobilenet_finetune/trained_weights_final.h5',
-            freeze_body=2) # make sure you know what you freeze
+    
+    model = create_model(input_shape, anchors, num_classes,load_pretrained=False,
+                        weights_path='logs/carMobilenet/000_Mobilenet_finetune/trained_weights_final.h5',
+        freeze_body=2) # make sure you know what you freeze
 
     logging = TensorBoard(log_dir=log_dir)
     # checkpoint = ModelCheckpoint(log_dir + 'car_mobilenet_yolov3.ckpt',
@@ -137,36 +134,6 @@ def create_model(input_shape, anchors, num_classes, load_pretrained=False, freez
     print(model_body.output)
     model_loss = Lambda(yolo_loss, output_shape=(1,), name='yolo_loss',
         arguments={'anchors': anchors, 'num_classes': num_classes, 'ignore_thresh': 0.5})(
-        [*model_body.output, *y_true])
-    model = Model([model_body.input, *y_true], model_loss)
-
-    return model
-
-def create_tiny_model(input_shape, anchors, num_classes, load_pretrained=True, freeze_body=2,
-            weights_path='model_data/tiny_yolo_weights.h5'):
-    '''create the training model, for Tiny YOLOv3'''
-    K.clear_session() # get a new session
-    image_input = Input(shape=(None, None, 3))
-    h, w = input_shape
-    num_anchors = len(anchors)
-
-    y_true = [Input(shape=(h//{0:32, 1:16}[l], w//{0:32, 1:16}[l], \
-        num_anchors//2, num_classes+5)) for l in range(2)]
-
-    model_body = tiny_yolo_body(image_input, num_anchors//2, num_classes)
-    print('Create Tiny YOLOv3 model with {} anchors and {} classes.'.format(num_anchors, num_classes))
-
-    if load_pretrained:
-        model_body.load_weights(weights_path, by_name=True, skip_mismatch=True)
-        print('Load weights {}.'.format(weights_path))
-        if freeze_body in [1, 2]:
-            # Freeze the darknet body or freeze all but 2 output layers.
-            num = (20, len(model_body.layers)-2)[freeze_body-1]
-            for i in range(num): model_body.layers[i].trainable = False
-            print('Freeze the first {} layers of total {} layers.'.format(num, len(model_body.layers)))
-
-    model_loss = Lambda(yolo_loss, output_shape=(1,), name='yolo_loss',
-        arguments={'anchors': anchors, 'num_classes': num_classes, 'ignore_thresh': 0.7})(
         [*model_body.output, *y_true])
     model = Model([model_body.input, *y_true], model_loss)
 
