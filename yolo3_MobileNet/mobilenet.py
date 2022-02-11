@@ -6,7 +6,7 @@ import tensorflow as tf
 from keras import backend as K
 from keras.layers import merge,Conv2D, Add, ZeroPadding2D, UpSampling2D, Concatenate, MaxPooling2D
 from keras.layers.advanced_activations import LeakyReLU
-from keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import BatchNormalization
 from keras.models import Model
 from keras.applications.mobilenet import MobileNet
 from keras.regularizers import l2
@@ -343,7 +343,7 @@ def yolo_eval(yolo_outputs,
 
 def preprocess_true_boxes(true_boxes, input_shape, anchors, num_classes):
     '''Preprocess true boxes to training input format
-
+    
     Parameters
     ----------
     true_boxes: array, shape=(m, T, 5)
@@ -357,6 +357,7 @@ def preprocess_true_boxes(true_boxes, input_shape, anchors, num_classes):
     y_true: list of array, shape like yolo_outputs, xywh are reletive value
 
     '''
+    #print("###################@n_classes#############",num_classes)
     assert (true_boxes[..., 4]<num_classes).all(), 'class id must be less than num_classes'
     num_layers = len(anchors)//3 # default setting
     anchor_mask = [[6,7,8], [3,4,5], [0,1,2]] if num_layers==3 else [[3,4,5], [1,2,3]]
@@ -503,7 +504,7 @@ def yolo_loss(args, anchors, num_classes, ignore_thresh=.5, print_loss=False):
             best_iou = K.max(iou, axis=-1)
             ignore_mask = ignore_mask.write(b, K.cast(best_iou<ignore_thresh, K.dtype(true_box)))
             return b+1, ignore_mask
-        _, ignore_mask = K.control_flow_ops.while_loop(lambda b,*args: b<m, loop_body, [0, ignore_mask])
+        _, ignore_mask = tf.while_loop(lambda b,*args: b<m, loop_body, [0, ignore_mask])
         ignore_mask = ignore_mask.stack()
         ignore_mask = K.expand_dims(ignore_mask, -1)
 

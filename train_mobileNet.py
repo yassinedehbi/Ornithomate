@@ -6,17 +6,17 @@ import numpy as np
 import keras.backend as K
 from keras.layers import Input, Lambda
 from keras.models import Model
-from keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 from keras.callbacks import TensorBoard, ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
 import os
-from yolo3_MobileNet.mobilenet import preprocess_true_boxes, yolo_body, tiny_yolo_body, yolo_loss
+from yolo3_MobileNet.mobilenet import preprocess_true_boxes, yolo_body, yolo_loss
 from yolo3_MobileNet.utils import get_random_data
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 def _main():
     train_path = '/Users/yassinedehbi/ProjetLong/birds-data/train.txt'
     val_path = '/Users/yassinedehbi/ProjetLong/birds-data/val.txt'
-    log_dir = 'logs/001_Mobilenet_finetune/'
+    log_dir = '/Users/yassinedehbi/ProjetLong/logs/'
     classes_path = '/Users/yassinedehbi/ProjetLong/birds-data/classes.txt'
     anchors_path = '/Users/yassinedehbi/ProjetLong/yolo_anchors.txt'
     class_names = get_classes(classes_path)
@@ -44,20 +44,20 @@ def _main():
     np.random.seed(10101)
     np.random.shuffle(t_lines)
     np.random.seed(None)
-    v_lines = t_lines[8000:]
-    t_lines = t_lines[:8000]
+    #v_lines = t_lines[8000:]
+    #t_lines = t_lines[:8000]
     num_train = len(t_lines)
-    # with open(val_path) as v_f:
-    #     v_lines = v_f.readlines()
-    # np.random.seed(10010)
-    # np.random.shuffle(v_lines)
-    # np.random.seed(None)
+    with open(val_path) as v_f:
+         v_lines = v_f.readlines()
+    np.random.seed(10010)
+    np.random.shuffle(v_lines)
+    np.random.seed(None)
     num_val = len(v_lines)
 
     # Train with frozen layers first, to get a stable loss.
     # Adjust num epochs to your dataset. This step is enough to obtain a not bad model.
     if True:
-        model.compile(optimizer=Adam(lr=1e-3), loss={
+        model.compile(optimizer=Adam(learning_rate=1e-3), loss={
             # use custom yolo_loss Lambda layer.
             'yolo_loss': lambda y_true, y_pred: y_pred})
 

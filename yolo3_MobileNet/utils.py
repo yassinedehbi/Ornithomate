@@ -36,10 +36,12 @@ def rand(a=0, b=1):
 def get_random_data(annotation_line, input_shape, random=True, max_boxes=20, jitter=.3, hue=.1, sat=1.5, val=1.5, proc_img=True):
     '''random preprocessing for real-time data augmentation'''
     line = annotation_line.split()
+    #print('####################################Khryaaaa####################################',line)
     image = Image.open(line[0])
     iw, ih = image.size
     h, w = input_shape
-    box = np.array([np.array(list(map(int,box.split(',')))) for box in line[1:]])
+    #box = np.array([np.array(list(map(int,box.split(',')))) for box in line[1:]])
+    box = (np.array([np.array(list(map(int,map(float,box.split(','))))) for box in line[1:]]))
 
     if not random:
         # resize image
@@ -63,6 +65,7 @@ def get_random_data(annotation_line, input_shape, random=True, max_boxes=20, jit
             box[:, [0,2]] = box[:, [0,2]]*scale + dx
             box[:, [1,3]] = box[:, [1,3]]*scale + dy
             box_data[:len(box)] = box
+            #print("###############box_data####################", box_data)
 
         return image_data, box_data
 
