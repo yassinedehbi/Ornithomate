@@ -1,5 +1,5 @@
 """
-Retrain the YOLO model for your own dataset.
+Retrain the YOLO model
 """
 
 import numpy as np
