@@ -11,14 +11,14 @@ from keras.callbacks import TensorBoard, ModelCheckpoint, ReduceLROnPlateau, Ear
 import os
 from yolo3_MobileNet.mobilenet import preprocess_true_boxes, yolo_body, yolo_loss
 from yolo3_MobileNet.utils import get_random_data
-
+MYY_PATH = '/Users/yassinedehbi/'
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-def _main():
-    train_path = '/Users/yassinedehbi/ProjetLong/birds-data/train.txt'
-    val_path = '/Users/yassinedehbi/ProjetLong/birds-data/val.txt'
-    log_dir = '/Users/yassinedehbi/ProjetLong/logs/'
-    classes_path = '/Users/yassinedehbi/ProjetLong/birds-data/classes.txt'
-    anchors_path = '/Users/yassinedehbi/ProjetLong/yolo_anchors.txt'
+def _main(MY_PATH=MYY_PATH):
+    train_path = MY_PATH+ 'ProjetLong/data/train_data.txt'
+    val_path = MY_PATH+ 'ProjetLong/data/val_data.txt'
+    log_dir = MY_PATH+ 'ProjetLong/logs/'
+    classes_path = MY_PATH+ 'ProjetLong/data/classes.txt'
+    anchors_path = MY_PATH+ 'ProjetLong/yolo_anchors.txt'
     class_names = get_classes(classes_path)
     num_classes = len(class_names)
     anchors = get_anchors(anchors_path)
@@ -28,7 +28,7 @@ def _main():
     is_tiny_version = len(anchors)==6 # default setting
     
     model = create_model(input_shape, anchors, num_classes,load_pretrained=False,
-                        weights_path='logs/carMobilenet/000_Mobilenet_finetune/trained_weights_final.h5',
+                        weights_path=MY_PATH+'logs/000_Mobilenet_finetune/trained_weights_final.h5',
         freeze_body=2) # make sure you know what you freeze
 
     logging = TensorBoard(log_dir=log_dir)
@@ -44,8 +44,9 @@ def _main():
     np.random.seed(10101)
     np.random.shuffle(t_lines)
     np.random.seed(None)
-    #v_lines = t_lines[8000:]
-    #t_lines = t_lines[:8000]
+    #train_test_pourcentage = int(len(t_lines)*0.8)
+    #v_lines = t_lines[train_test_pourcentage:]
+    #t_lines = t_lines[:train_test_pourcentage]
     num_train = len(t_lines)
     with open(val_path) as v_f:
          v_lines = v_f.readlines()
@@ -63,7 +64,14 @@ def _main():
 
         batch_size = 16
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
-        model.fit_generator(data_generator_wrapper(t_lines, batch_size, input_shape, anchors, num_classes),
+        #model.fit_generator(data_generator_wrapper(t_lines, batch_size, input_shape, anchors, num_classes),
+        #        steps_per_epoch=max(1, num_train//batch_size),
+        #        validation_data=data_generator_wrapper(v_lines, batch_size, input_shape, anchors, num_classes),
+        #        validation_steps=max(1, num_val//batch_size),
+        #        epochs=30,
+        #        initial_epoch=0,
+        #        callbacks=[logging, checkpoint])
+        model.fit(data_generator_wrapper(t_lines, batch_size, input_shape, anchors, num_classes),
                 steps_per_epoch=max(1, num_train//batch_size),
                 validation_data=data_generator_wrapper(v_lines, batch_size, input_shape, anchors, num_classes),
                 validation_steps=max(1, num_val//batch_size),
@@ -78,10 +86,17 @@ def _main():
         print("Unfreeze and continue training, to fine-tune.")
         for i in range(len(model.layers)):
             model.layers[i].trainable= True
-        model.compile(optimizer=Adam(lr=1e-4), loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # recompile to apply the change
+        model.compile(optimizer=Adam(learning_rate=1e-4), loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # recompile to apply the change
         batch_size = 16 # note that more GPU memory is required after unfreezing the body
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
-        model.fit_generator(data_generator_wrapper(t_lines, batch_size, input_shape, anchors, num_classes),
+        #model.fit_generator(data_generator_wrapper(t_lines, batch_size, input_shape, anchors, num_classes),
+        #    steps_per_epoch=max(1, num_train//batch_size),
+        #    validation_data=data_generator_wrapper(v_lines, batch_size, input_shape, anchors, num_classes),
+        #    validation_steps=max(1, num_val//batch_size),
+        #    epochs=20,
+        #    initial_epoch=0,
+        #    callbacks=[logging, checkpoint, reduce_lr, early_stopping])
+        model.fit(data_generator_wrapper(t_lines, batch_size, input_shape, anchors, num_classes),
             steps_per_epoch=max(1, num_train//batch_size),
             validation_data=data_generator_wrapper(v_lines, batch_size, input_shape, anchors, num_classes),
             validation_steps=max(1, num_val//batch_size),
