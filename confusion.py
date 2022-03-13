@@ -11,6 +11,10 @@ predicted_label = []
 for index, row in test_predictions.iterrows():
     actual_label.append(row["actual_label"])
     predicted_label.append(row["predicted_label"])
+plt.scatter([i for i in range(17)], [sum(1 for x in actual_label if x==i) for i in range(17)])
+plt.xticks(np.arange(17), ['SITTOR','PINARB','TOUTUR','ROUGOR','MESCHA','MOIDOM','MESNON','VEREUR','ACCMOU','MESBLE', 'ECUROU', 'PIEBAV', 'MULGRI',
+        'CAMPAG', 'MESNOI', 'MESHUP', 'BERGRI'], rotation=90)
+plt.show()
 print([sum(1 for x in actual_label if x==i) for i in range(17)])
 print([sum(1 for x in predicted_label if x==i) for i in range(18)])
 print(sum(1 for x,y in zip(actual_label,predicted_label) if x == y) / len(actual_label))

@@ -202,6 +202,8 @@ if __name__ == '__main__':
     for index, row in test_data.iterrows():
         image = Image.open(row['path'])
         rects = yolo.detect_image(image)
+        print(row['path'])
+        print(rects)
         if len(rects) > 0:
             max_score=rects[0]["score"]
             max_i=0
