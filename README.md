@@ -1,8 +1,4 @@
----
-title: Manuel utilisateur
-numbersections: true
-lang: fr-FR
----
+# Manuel utilisateur
 
 Ce manuel est destiné aux personnes qui souhaiteraient utiliser l'onithomate.
 Il explique comment installer le code sur une machine, comment utiliser les
@@ -15,7 +11,7 @@ au bon fonctionnement du modèle.
 I. [Installation](#installation)
 II. [Préparation des données](#data)
 III. [Entrainement du modèle](#train)
-IV. [Test du modèle](#train)
+IV. [Test du modèle](#test)
 V. [Evaluation du modèle](#metrics)
 
 # I. Installation du framework  <a id='installation'></a>
@@ -85,6 +81,19 @@ Le script parse les xmls qui existent dans le dossier annotations et crée
 trois fichiers (train_data, val_data et test_data) selon la répartition
 présente dans le fichier Ornithotasks-CVAT_task.
 
+Les fichiers générés sont de la forme suivante:   
+
+Chaque image est représentée par plusieurs lignes selon le nombre d'oiseaux dans l'image.
+Format de la ligne: `image_file_path,x_min,y_min,x_max,y_max,class_id`.
+
+Voici un exemple:
+```
+Ornithomate/raw_data/task_05-01-2021/2021-01-05-15-58-14.jpg,885.77,603.82,1918.11,1088.0,0
+Ornithomate/raw_data/task_05-01-2021/2021-01-05-15-58-14.jpg,885.77,603.82,1918.11,1088.0,0
+Ornithomate/raw_data/task_05-01-2021/2021-01-05-15-58-16.jpg,1127.0,538.2,1900.7,1012.91,0
+...
+```
+
 # III. Entrainement du modèle  <a id='train'></a>
 
 Avant d'entrainer le modèle, vous devez modifier la variable __MYY_PATH__ 
@@ -132,7 +141,7 @@ la confidence du modèle.
 Avant de lancer les scripts d'évaluation, vous devez faire des modifications.
 Dans confusion.py, il faut changer le path vers le fichier des prédictions généré
 par la partie test (ligne: 7). Dans metrics.py, il faut modifier le path vers le fichier
-des images de test (ligne : 18) et le path vers le fichier des prédictions (ligne: 20).  
+des images de test (ligne : 18) et le path vers le fichier des prédictions (ligne: 20).
 
 Le fichier confusion.py print la précision du modèle sur la totalité des classes, et aussi
 la matrice de confusion.
@@ -140,6 +149,19 @@ la matrice de confusion.
 ```bash
 py confusion.py
 ```
+
+La courbe Précision-Rappel est un bon moyen d'évaluer les performances d'un détecteur d'objets
+car la confiance est modifiée en traçant une courbe pour chaque classe d'objets. Un détecteur d'objet
+d'une classe particulière est considéré comme bon si sa précision reste élevée à mesure que le rappel
+augmente, ce qui signifie que si vous faites varier le seuil de confiance, la précision et le rappel
+seront toujours élevés.
+
+Une autre façon de comparer les performances des détecteurs d'objets consiste à calculer l'aire sous
+la courbe (AUC) de la courbe Précision x Rappel. Comme les courbes AP sont souvent des courbes en zigzag
+qui montent et descendent, comparer différentes courbes (différents détecteurs) dans le même tracé n'est
+généralement pas une tâche facile - car les courbes ont tendance à se croiser très fréquemment. C'est pourquoi
+la précision moyenne (AP), une mesure numérique, peut également nous aider à comparer différents détecteurs.
+En pratique, AP est la précision moyenne sur toutes les valeurs de rappel entre 0 et 1.
 
 Le fichier metrics.py fournit pour chaque classe la précision moyenne (average precision) et
 la courbe precision-recall.
