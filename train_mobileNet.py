@@ -48,7 +48,7 @@ def _main(MY_PATH=MYY_PATH):
         model = create_tiny_model(input_shape, anchors, num_classes,
             freeze_body=2)
     else:
-        model = create_model(input_shape, anchors, num_classes,load_pretrained=True,
+        model = create_model(input_shape, anchors, num_classes,load_pretrained=False,
                             weights_path=log_dir+'3gen_stage_1.h5',
             freeze_body=2) # make sure you know what you freeze
 
